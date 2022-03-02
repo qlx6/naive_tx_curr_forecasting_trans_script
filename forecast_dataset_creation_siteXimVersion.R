@@ -1,7 +1,7 @@
 # qlx6@cdc.gov
 # ------------------------------------------------------- #
 # - Create Dataset for TX_CUR Naive Forecast ------------ #
-# - Description: Script to transform the the MSD PSNU*IM  #
+# - Description: Script to transform the the MSD SITE*IM  #
 #              MSD to structure for naive indicator ----- #
 #              forecast --------------------------------- #
 # ------------------------------------------------------- #
@@ -10,20 +10,16 @@
 library(tidyverse)
 library(readxl)
 
-#setwd("C:/Users/qlx6/Downloads/PSNU_IM_FY19-22_20211217_v2_1")
-#ous <- read_tsv(file = "MER_Structured_Datasets_PSNU_IM_FY19-22_20211217_v2_1.txt")
-
-ou <- read_tsv(file.choose()) %>% 
+oua <- read_tsv(file.choose()) %>% 
   filter(indicator %in% c("TX_CURR",
                           "HTS_TST_POS",
                           "PrEP_CURR",
-                          "VMMC_CIRC",
-                          "PrEP_CT"))
+                          "VMMC_CIRC"))
 
-names(ou)
+names(oua)
 
 
-tx_curr <- ou %>% 
+tx_curra <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility, fiscal_year, 
          qtr1, qtr2, qtr3, qtr4, targets) %>% 
@@ -36,7 +32,7 @@ tx_curr <- ou %>%
 
 # ---------------------------------------------------------------------------------------------
 
-hts_tst_pos <- ou %>% 
+hts_tst_posa <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility, fiscal_year, 
          qtr1, qtr2, qtr3, qtr4, targets) %>% 
@@ -47,7 +43,7 @@ hts_tst_pos <- ou %>%
   dplyr::rename(ou=operatingunit, Q1=qtr1, Q2=qtr2, Q3=qtr3, Q4=qtr4, tar=targets) 
 
 
-prep_curr <- ou %>% 
+prep_curra <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility, fiscal_year, 
          qtr1, qtr2, qtr3, qtr4, targets) %>% 
@@ -59,7 +55,7 @@ prep_curr <- ou %>%
   dplyr::rename(ou=operatingunit, Q1=qtr1, Q2=qtr2, Q3=qtr3, Q4=qtr4, tar=targets) 
 
 
-prep_ct <- ou %>% 
+prep_cta <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility, fiscal_year, 
          qtr1, qtr2, qtr3, qtr4, targets) %>% 
@@ -71,7 +67,7 @@ prep_ct <- ou %>%
                                            "Total Numerator")) %>% 
   dplyr::rename(ou=operatingunit, Q1=qtr1, Q2=qtr2, Q3=qtr3, Q4=qtr4, tar=targets)
 
-vmmc_circ <- ou %>% 
+vmmc_circa <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility, fiscal_year, 
          qtr1, qtr2, qtr3, qtr4, targets) %>% 
@@ -85,18 +81,18 @@ vmmc_circ <- ou %>%
   dplyr::rename(ou=operatingunit, Q1=qtr1, Q2=qtr2, Q3=qtr3, Q4=qtr4, tar=targets) 
 
 # ---------------------------------------------------------------------------------------------
-ous2 <- bind_rows(tx_curr, hts_tst_pos, prep_curr, prep_ct, vmmc_circ)
+ous2a <- bind_rows(tx_curra, hts_tst_posa, prep_curra, vmmc_circa)
 # ---------------------------------------------------------------------------------------------
 
 
-ous2 <- pivot_longer(ous2, Q1:tar,
+ous2a <- pivot_longer(ous2a, Q1:tar,
                      names_to = "period",
                      values_to = "value") %>% 
   na.omit(indicator)
 
 
 
-ous3 <- ous2 %>% 
+ous3a <- ous2a %>% 
   select(ou, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
          trendscoarse, fundingagency, community, facility,
          fiscal_year, period, value) %>% 
@@ -105,6 +101,9 @@ ous3 <- ous2 %>%
         sep = "_",
         remove = FALSE)
 
-ous3$trendsfine <- as.character(ous3$trendsfine)
+ous3a$trendsfine <- as.character(ous3a$trendsfine)
 
-write_csv(ous3, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/ous_feb_28.csv")
+write_csv(all, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/all_feb_28a.csv")
+
+
+all <- bind_rows(ous3, ous3a)
