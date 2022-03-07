@@ -25,8 +25,8 @@ names(ou)
 
 tx_curr <- ou %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("TX_CURR") & 
            standardizeddisaggregate %in% c("Age/Sex/ARVDispense/HIVStatus",
                                            "Age/Sex/HIVStatus",
@@ -38,8 +38,8 @@ tx_curr <- ou %>%
 
 hts_tst_pos <- ou %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("HTS_TST_POS") & 
            standardizeddisaggregate %in% c("KeyPop/Result",
                                            "Modality/Age/Sex/Result",
@@ -49,8 +49,8 @@ hts_tst_pos <- ou %>%
 
 prep_curr <- ou %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("PrEP_CURR") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "KeyPop",
@@ -61,8 +61,8 @@ prep_curr <- ou %>%
 
 prep_ct <- ou %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("PrEP_CT") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "KeyPop",
@@ -73,8 +73,8 @@ prep_ct <- ou %>%
 
 vmmc_circ <- ou %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("VMMC_CIRC") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "Age/Sex/HIVStatus",
@@ -89,17 +89,17 @@ ous2 <- bind_rows(tx_curr, hts_tst_pos, prep_curr, prep_ct, vmmc_circ)
 # ---------------------------------------------------------------------------------------------
 
 
-ous2 <- pivot_longer(ous2, Q1:tar,
-                     names_to = "period",
-                     values_to = "value") %>% 
-  na.omit(indicator)
+ous2 <- pivot_longer(ous2, c("Q1", "Q2", "Q3", "Q4", "tar"),
+                      names_to = "period",
+                      values_to = "value") %>%     
+  filter(!is.na(value))
 
 
 
 ous3 <- ous2 %>% 
   select(ou, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility,
-         fiscal_year, period, value) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, period, value) %>% 
   unite("quarter",
         c("fiscal_year", "period"),
         sep = "_",
@@ -107,4 +107,4 @@ ous3 <- ous2 %>%
 
 ous3$trendsfine <- as.character(ous3$trendsfine)
 
-write_csv(ous3, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/ous_feb_28.csv")
+write_csv(ous3, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/all_mar_03a.csv")

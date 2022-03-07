@@ -14,6 +14,7 @@ oua <- read_tsv(file.choose()) %>%
   filter(indicator %in% c("TX_CURR",
                           "HTS_TST_POS",
                           "PrEP_CURR",
+                          "PrEP_CT",
                           "VMMC_CIRC"))
 
 names(oua)
@@ -21,8 +22,8 @@ names(oua)
 
 tx_curra <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("TX_CURR") & 
            standardizeddisaggregate %in% c("Age/Sex/ARVDispense/HIVStatus",
                                            "Age/Sex/HIVStatus",
@@ -34,8 +35,8 @@ tx_curra <- oua %>%
 
 hts_tst_posa <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("HTS_TST_POS") & 
            standardizeddisaggregate %in% c("KeyPop/Result",
                                            "Modality/Age/Sex/Result",
@@ -45,8 +46,8 @@ hts_tst_posa <- oua %>%
 
 prep_curra <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("PrEP_CURR") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "KeyPop",
@@ -57,8 +58,8 @@ prep_curra <- oua %>%
 
 prep_cta <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("PrEP_CT") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "KeyPop",
@@ -69,8 +70,8 @@ prep_cta <- oua %>%
 
 vmmc_circa <- oua %>% 
   select(operatingunit, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility, fiscal_year, 
-         qtr1, qtr2, qtr3, qtr4, targets) %>% 
+         trendscoarse, primepartner, fundingagency, mech_name, mech_code, community, 
+         facility, modality, fiscal_year, qtr1, qtr2, qtr3, qtr4, targets) %>% 
   filter(indicator %in% c("VMMC_CIRC") & 
            standardizeddisaggregate %in% c("Age/Sex",
                                            "Age/Sex/HIVStatus",
@@ -81,21 +82,19 @@ vmmc_circa <- oua %>%
   dplyr::rename(ou=operatingunit, Q1=qtr1, Q2=qtr2, Q3=qtr3, Q4=qtr4, tar=targets) 
 
 # ---------------------------------------------------------------------------------------------
-ous2a <- bind_rows(tx_curra, hts_tst_posa, prep_curra, vmmc_circa)
+ous2a <- bind_rows(tx_curra, hts_tst_posa, prep_curra, prep_cta, vmmc_circa)
 # ---------------------------------------------------------------------------------------------
 
 
-ous2a <- pivot_longer(ous2a, Q1:tar,
+ous2a <- pivot_longer(ous2a, c("Q1", "Q2", "Q3", "Q4", "tar"),
                      names_to = "period",
-                     values_to = "value") %>% 
-  na.omit(indicator)
-
-
+                     values_to = "value") %>%     
+  filter(!is.na(value))
 
 ous3a <- ous2a %>% 
   select(ou, snu1, indicator, sex, standardizeddisaggregate, trendsfine, 
-         trendscoarse, fundingagency, community, facility,
-         fiscal_year, period, value) %>% 
+         trendscoarse, primepartner, fundingagency,  mech_name, mech_code, 
+         community, facility, modality, fiscal_year, period, value) %>% 
   unite("quarter",
         c("fiscal_year", "period"),
         sep = "_",
@@ -103,7 +102,5 @@ ous3a <- ous2a %>%
 
 ous3a$trendsfine <- as.character(ous3a$trendsfine)
 
-write_csv(all, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/all_feb_28a.csv")
+write_csv(ous3a, file = "C:/Users/qlx6/OneDrive - CDC/general dynamics - icpi/clusters.teams.workgroups/a_innovation/mer_forecasting/all_mar_03a.csv")
 
-
-all <- bind_rows(ous3, ous3a)
